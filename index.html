@@ -40,7 +40,9 @@
   label.chk:hover{background:#f3ece2}
   label.chk.on{background:var(--good-soft);border-color:#c8ddc6}
   label.chk input{width:19px;height:19px;accent-color:var(--good);flex:none;margin:0}
-  label.chk .mr{color:var(--muted);font-size:13px;margin-left:auto;text-align:right}
+  label.chk .mr{color:var(--muted);font-size:13px;margin-left:auto;text-align:right;padding-left:8px}
+  .stock{font-style:normal;font-size:11px;letter-spacing:.04em;text-transform:uppercase;
+         background:var(--good-soft);color:var(--good);border-radius:4px;padding:1px 5px;margin-left:5px}
 
   button{font-family:inherit;font-size:15px;cursor:pointer;border-radius:10px;border:1px solid var(--line);
          background:var(--card);color:var(--ink);padding:9px 14px}
@@ -148,6 +150,11 @@
         <button class="tiny" id="copyShop">Copy for WhatsApp</button>
         <button class="tiny" id="clearShop">Clear list</button>
       </div>
+    </div>
+    <div class="card">
+      <h2>Add anything</h2>
+      <p class="empty" style="margin-top:-6px">Tap to put it on the list. Items marked <em class="stock">have</em> are already ticked in the pantry.</p>
+      <div id="shopPick"></div>
     </div>
     <div class="card" id="shopTextCard" style="display:none">
       <pre class="out" id="shopText"></pre>
@@ -358,15 +365,40 @@ function renderMore(){
 /* ---------------- shopping list ---------------- */
 function renderShop(){
   const el = document.getElementById('shopOut');
-  if (!state.shop.length){ el.innerHTML = '<div class="empty">Empty. Add things from the “If we had more” tab.</div>';
-                           document.getElementById('shopTextCard').style.display='none'; return; }
-  el.innerHTML = '<div class="grid">' + state.shop.map(id => {
-    const i = BY_ID[id];
-    return `<label class="chk on" data-rm="${id}"><input type="checkbox" checked>
-      <span>${i.en}</span><span class="mr">${i.mr}</span></label>`;
-  }).join('') + '</div>';
-  el.querySelectorAll('[data-rm]').forEach(l => l.querySelector('input').onchange = () => {
-    state.shop = state.shop.filter(x => x !== l.dataset.rm); save(); renderShop();
+  if (!state.shop.length){
+    el.innerHTML = '<div class="empty">Nothing on the list yet — tap anything below, or add missing items from the “If we had more” tab.</div>';
+    document.getElementById('shopTextCard').style.display='none';
+  } else {
+    el.innerHTML = '<div class="grid">' + state.shop.map(id => {
+      const i = BY_ID[id];
+      return `<label class="chk on" data-rm="${id}"><input type="checkbox" checked>
+        <span>${i.en}</span><span class="mr">${i.mr}</span></label>`;
+    }).join('') + '</div>';
+    el.querySelectorAll('[data-rm]').forEach(l => l.querySelector('input').onchange = () => {
+      state.shop = state.shop.filter(x => x !== l.dataset.rm); save(); renderShop();
+    });
+  }
+  renderShopPicker();
+}
+
+function renderShopPicker(){
+  const el = document.getElementById('shopPick');
+  el.innerHTML = CATEGORIES.map(c => {
+    const items = INGREDIENTS.filter(i => i.cat === c.id);
+    return `<h3>${c.en} · ${c.mr}</h3><div class="grid">` + items.map(i => {
+      const on = state.shop.includes(i.id);
+      return `<label class="chk${on?' on':''}" data-pick="${i.id}">
+         <input type="checkbox" ${on?'checked':''}>
+         <span>${i.en}${has(i.id)?' <em class="stock">have</em>':''}</span>
+         <span class="mr">${i.mr}</span>
+       </label>`;
+    }).join('') + `</div>`;
+  }).join('');
+  el.querySelectorAll('[data-pick]').forEach(l => l.querySelector('input').onchange = e => {
+    const id = l.dataset.pick;
+    if (e.target.checked){ if(!state.shop.includes(id)) state.shop.push(id); }
+    else state.shop = state.shop.filter(x => x !== id);
+    save(); renderShop();
   });
 }
 function shopMessage(){
