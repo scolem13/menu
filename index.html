@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kitchen Menu</title>
+<style>
+  :root{
+    --bg:#faf6ef; --card:#fffdf9; --ink:#2c2622; --muted:#8a7f74;
+    --line:#e6ddd0; --accent:#b4522e; --accent-soft:#f6e7df;
+    --good:#4b7a4e; --good-soft:#e8f1e6;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans Devanagari",sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:20px 16px 80px}
+  header h1{font-size:26px;margin:0 0 2px;letter-spacing:-.02em}
+  header p{margin:0 0 18px;color:var(--muted);font-size:14px}
+  .rules{background:var(--accent-soft);border-radius:var(--radius);padding:10px 14px;font-size:13.5px;color:#7b3d25;margin-bottom:20px}
+
+  .tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+  .tab{padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);
+       cursor:pointer;font-size:15px;color:var(--muted);font-family:inherit}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .panel{display:none} .panel.on{display:block}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+  h2{font-size:17px;margin:0 0 12px}
+  h3{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 0 10px;font-weight:600}
+  h3:first-of-type{margin-top:0}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:6px}
+  label.chk{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;cursor:pointer;
+            border:1px solid transparent;user-select:none;font-size:15px}
+  label.chk:hover{background:#f3ece2}
+  label.chk.on{background:var(--good-soft);border-color:#c8ddc6}
+  label.chk input{width:19px;height:19px;accent-color:var(--good);flex:none;margin:0}
+  label.chk .mr{color:var(--muted);font-size:13px;margin-left:auto;text-align:right}
+
+  button{font-family:inherit;font-size:15px;cursor:pointer;border-radius:10px;border:1px solid var(--line);
+         background:var(--card);color:var(--ink);padding:9px 14px}
+  button:hover{background:#f3ece2}
+  button.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;padding:12px 22px;font-size:16px}
+  button.primary:hover{filter:brightness(1.07)}
+  button.tiny{padding:5px 10px;font-size:13px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .spacer{flex:1}
+
+  .dish{border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;background:var(--card)}
+  .dish .top{display:flex;gap:12px;align-items:flex-start}
+  .dish .name{font-size:19px;font-weight:600;margin:0}
+  .dish .names{color:var(--muted);font-size:14px;margin:2px 0 0}
+  .dish .note{margin:8px 0 0;font-size:14px;color:#5c5249}
+  .dish .uses{margin:8px 0 0;font-size:13px;color:var(--muted)}
+  .slot-label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+
+  .miss{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:var(--card)}
+  .pill{display:inline-block;background:var(--accent-soft);color:#7b3d25;border-radius:999px;
+        padding:2px 10px;font-size:13px;margin:3px 4px 0 0}
+
+  textarea{width:100%;min-height:110px;padding:11px;border-radius:10px;border:1px solid var(--line);
+           font-family:inherit;font-size:15px;background:#fff;resize:vertical}
+  pre.out{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;
+          white-space:pre-wrap;font:14px/1.6 inherit;margin:0}
+  .empty{color:var(--muted);font-size:15px;padding:8px 0}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:26px;background:var(--ink);color:#fff;
+         padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .toast.on{opacity:1}
+  .counts{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Kitchen Menu</h1>
+    <p>Tick what's in the house, get a meal. Reject anything you don't want.</p>
+  </header>
+  <div class="rules">Every dish here is already vegetarian · little to no dairy · very mild (toddler-safe) · low salt.</div>
+
+  <div class="tabs">
+    <button class="tab on" data-p="pantry">1 · What we have</button>
+    <button class="tab" data-p="menu">2 · Today's meal</button>
+    <button class="tab" data-p="more">3 · If we had more</button>
+    <button class="tab" data-p="shop">4 · Shopping list</button>
+  </div>
+
+  <!-- ================= PANTRY ================= -->
+  <section class="panel on" id="p-pantry">
+    <div class="card">
+      <div class="row">
+        <label class="chk on" style="border-color:#c8ddc6" id="mixerWrap">
+          <input type="checkbox" id="mixer"> <span>Mixer / grinder available</span>
+        </label>
+        <div class="spacer"></div>
+        <span class="counts" id="counts"></span>
+        <button class="tiny" id="staplesBtn">Reset staples</button>
+        <button class="tiny" id="clearBtn">Uncheck all</button>
+      </div>
+    </div>
+    <div class="card" id="pantryCard"></div>
+    <div class="card">
+      <h2>Paste a list</h2>
+      <p class="empty" style="margin-top:-6px">Paste a shopping list, a Blinkit order, or whatever Sean sends — English, Marathi or Hindi. Matching items get ticked.</p>
+      <textarea id="pasteBox" placeholder="carrot 1kg&#10;फ्लॉवर&#10;पालक&#10;bananas x6"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="primary" id="pasteBtn">Tick these items</button>
+        <span class="counts" id="pasteResult"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MENU ================= -->
+  <section class="panel" id="p-menu">
+    <div class="card">
+      <div class="row">
+        <button class="primary" id="genBtn">Make a menu</button>
+        <div class="spacer"></div>
+        <button class="tiny" id="copyMenu">Copy for WhatsApp</button>
+      </div>
+    </div>
+    <div id="menuOut"></div>
+    <div class="card" id="menuTextCard" style="display:none">
+      <h2>Message version</h2>
+      <pre class="out" id="menuText"></pre>
+    </div>
+  </section>
+
+  <!-- ================= MORE ================= -->
+  <section class="panel" id="p-more">
+    <div class="card">
+      <h2>Close to possible</h2>
+      <p class="empty" style="margin-top:-6px">Dishes that need only one or two more things. Tap to add the missing items to the shopping list.</p>
+    </div>
+    <div id="moreOut"></div>
+  </section>
+
+  <!-- ================= SHOP ================= -->
+  <section class="panel" id="p-shop">
+    <div class="card">
+      <h2>Shopping list</h2>
+      <div id="shopOut"></div>
+      <div class="row" style="margin-top:12px">
+        <button class="tiny" id="copyShop">Copy for WhatsApp</button>
+        <button class="tiny" id="clearShop">Clear list</button>
+      </div>
+    </div>
+    <div class="card" id="shopTextCard" style="display:none">
+      <pre class="out" id="shopText"></pre>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script>
+/* ---------------- state ---------------- */
+const BY_ID = Object.fromEntries(INGREDIENTS.map(i => [i.id, i]));
+const LS = 'menu-state-v1';
+let state = load();
+
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(LS));
+    if (s && s.have) return s;
+  }catch(e){}
+  return { have: INGREDIENTS.filter(i=>i.staple).map(i=>i.id), mixer:false, shop:[], menu:null };
+}
+function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
+function has(id){ return state.have.includes(id); }
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.classList.remove('on'), 1800);
+}
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  document.getElementById('p-'+b.dataset.p).classList.add('on');
+  if (b.dataset.p === 'more') renderMore();
+  if (b.dataset.p === 'shop') renderShop();
+});
+
+/* ---------------- pantry ---------------- */
+function renderPantry(){
+  const el = document.getElementById('pantryCard');
+  el.innerHTML = CATEGORIES.map(c => {
+    const items = INGREDIENTS.filter(i => i.cat === c.id);
+    return `<h3>${c.en} · ${c.mr}</h3><div class="grid">` + items.map(i =>
+      `<label class="chk${has(i.id)?' on':''}" data-id="${i.id}">
+         <input type="checkbox" ${has(i.id)?'checked':''}>
+         <span>${i.en}</span><span class="mr">${i.mr}</span>
+       </label>`).join('') + `</div>`;
+  }).join('');
+  el.querySelectorAll('label.chk').forEach(l => {
+    l.querySelector('input').onchange = e => {
+      const id = l.dataset.id;
+      if (e.target.checked){ if(!has(id)) state.have.push(id); }
+      else state.have = state.have.filter(x=>x!==id);
+      l.classList.toggle('on', e.target.checked);
+      save(); updateCounts();
+    };
+  });
+  document.getElementById('mixer').checked = state.mixer;
+  document.getElementById('mixerWrap').classList.toggle('on', state.mixer);
+  updateCounts();
+}
+function updateCounts(){
+  document.getElementById('counts').textContent = state.have.length + ' of ' + INGREDIENTS.length + ' ticked';
+}
+document.getElementById('mixer').onchange = e => {
+  state.mixer = e.target.checked;
+  document.getElementById('mixerWrap').classList.toggle('on', state.mixer);
+  save();
+};
+document.getElementById('staplesBtn').onclick = () => {
+  INGREDIENTS.filter(i=>i.staple).forEach(i => { if(!has(i.id)) state.have.push(i.id); });
+  save(); renderPantry(); toast('Staples ticked');
+};
+document.getElementById('clearBtn').onclick = () => {
+  state.have = []; save(); renderPantry(); toast('Cleared');
+};
+
+/* ---------------- paste parsing ---------------- */
+function normalize(s){ return s.toLowerCase().replace(/[^a-zऀ-ॿ]+/g,' ').trim(); }
+document.getElementById('pasteBtn').onclick = () => {
+  const text = normalize(document.getElementById('pasteBox').value);
+  if (!text){ document.getElementById('pasteResult').textContent=''; return; }
+  const hits = [];
+  INGREDIENTS.forEach(i => {
+    const keys = [i.en, i.mr, i.hi, i.tr].map(normalize)
+      .flatMap(k => [k, k.replace(/s$/,''), k.split(' ')[0]])
+      .filter(k => k.length > 2);
+    if (keys.some(k => text.includes(k))){
+      if (!has(i.id)) { state.have.push(i.id); hits.push(i.en); }
+    }
+  });
+  save(); renderPantry();
+  document.getElementById('pasteResult').textContent =
+    hits.length ? 'Added: ' + hits.join(', ') : 'Nothing new matched.';
+};
+
+/* ---------------- matching ---------------- */
+function available(r){
+  if (r.mixer && !state.mixer) return false;
+  return r.need.every(has);
+}
+function missingOf(r){ return r.need.filter(x => !has(x)); }
+function usedIn(r){ return r.need.concat((r.opt||[]).filter(has)); }
+
+const SLOTS = [
+  { key:'base',  label:'Main',      roles:['onepot','dal'] },
+  { key:'sabzi', label:'Vegetable', roles:['sabzi'] },
+  { key:'extra', label:'With it',   roles:['side','soup','rice','snack'] },
+];
+
+function pick(roles, exclude){
+  const pool = RECIPES.filter(r => roles.includes(r.role) && available(r) && !exclude.includes(r.id));
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function generate(){
+  const chosen = [];
+  state.menu = SLOTS.map(s => {
+    const r = pick(s.roles, chosen);
+    if (r) chosen.push(r.id);
+    return { slot:s.key, label:s.label, id: r ? r.id : null };
+  });
+  save(); renderMenu();
+}
+
+function reroll(i){
+  const s = SLOTS[i];
+  const others = state.menu.filter((_,j)=>j!==i).map(m=>m.id).filter(Boolean);
+  const cur = state.menu[i].id;
+  const r = pick(s.roles, others.concat(cur ? [cur] : []))
+         || pick(s.roles, others);
+  state.menu[i].id = r ? r.id : null;
+  save(); renderMenu();
+  if (!r) toast('Nothing else available for this slot');
+}
+
+function renderMenu(){
+  const out = document.getElementById('menuOut');
+  if (!state.menu){ out.innerHTML = '<div class="card empty">No menu yet — press “Make a menu”.</div>';
+                    document.getElementById('menuTextCard').style.display='none'; return; }
+  out.innerHTML = state.menu.map((m,i) => {
+    if (!m.id) return `<div class="card empty">${m.label}: nothing makeable with what's ticked.</div>`;
+    const r = RECIPES.find(x=>x.id===m.id);
+    return `<div class="dish">
+      <div class="slot-label">${m.label}</div>
+      <div class="top">
+        <div style="flex:1">
+          <p class="name">${r.en}</p>
+          <p class="names">${r.mr} · ${r.hi} · <i>${r.tr}</i></p>
+        </div>
+        <button class="tiny" data-reroll="${i}">Not this ↻</button>
+      </div>
+      <p class="note">${r.note}</p>
+      <p class="uses">Uses: ${usedIn(r).map(x=>BY_ID[x].en).join(', ')}</p>
+    </div>`;
+  }).join('');
+  out.querySelectorAll('[data-reroll]').forEach(b => b.onclick = ()=>reroll(+b.dataset.reroll));
+  document.getElementById('menuTextCard').style.display='none';
+}
+
+document.getElementById('genBtn').onclick = generate;
+
+function menuMessage(){
+  const rs = state.menu.filter(m=>m.id).map(m=>RECIPES.find(x=>x.id===m.id));
+  if (!rs.length) return '';
+  return 'आजचा मेनू / आज का मेन्यू / Today\'s menu\n\n' +
+    rs.map(r => `• ${r.mr}\n  ${r.hi}\n  ${r.tr} — ${r.en}`).join('\n\n');
+}
+document.getElementById('copyMenu').onclick = () => {
+  const t = menuMessage();
+  if (!t) return toast('Make a menu first');
+  document.getElementById('menuText').textContent = t;
+  document.getElementById('menuTextCard').style.display = 'block';
+  copy(t);
+};
+
+/* ---------------- what if we had more ---------------- */
+function renderMore(){
+  const cands = RECIPES
+    .filter(r => !(r.mixer && !state.mixer))
+    .map(r => ({ r, miss: missingOf(r) }))
+    .filter(x => x.miss.length >= 1 && x.miss.length <= 3)
+    .sort((a,b) => a.miss.length - b.miss.length || a.r.en.localeCompare(b.r.en))
+    .slice(0, 14);
+  const el = document.getElementById('moreOut');
+  if (!cands.length){ el.innerHTML = '<div class="card empty">Nothing close — either you have everything, or tick a few more items first.</div>'; return; }
+  el.innerHTML = cands.map(({r,miss}) => `
+    <div class="miss">
+      <div class="row">
+        <div style="flex:1">
+          <strong>${r.en}</strong> <span style="color:var(--muted)">· ${r.mr}</span>
+          <div>${miss.map(m=>`<span class="pill">${BY_ID[m].en} / ${BY_ID[m].mr}</span>`).join('')}</div>
+        </div>
+        <button class="tiny" data-add="${miss.join(',')}">+ Add to list</button>
+      </div>
+    </div>`).join('');
+  el.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+    b.dataset.add.split(',').forEach(id => { if(!state.shop.includes(id)) state.shop.push(id); });
+    save(); toast('Added to shopping list');
+  });
+}
+
+/* ---------------- shopping list ---------------- */
+function renderShop(){
+  const el = document.getElementById('shopOut');
+  if (!state.shop.length){ el.innerHTML = '<div class="empty">Empty. Add things from the “If we had more” tab.</div>';
+                           document.getElementById('shopTextCard').style.display='none'; return; }
+  el.innerHTML = '<div class="grid">' + state.shop.map(id => {
+    const i = BY_ID[id];
+    return `<label class="chk on" data-rm="${id}"><input type="checkbox" checked>
+      <span>${i.en}</span><span class="mr">${i.mr}</span></label>`;
+  }).join('') + '</div>';
+  el.querySelectorAll('[data-rm]').forEach(l => l.querySelector('input').onchange = () => {
+    state.shop = state.shop.filter(x => x !== l.dataset.rm); save(); renderShop();
+  });
+}
+function shopMessage(){
+  return 'खरेदीची यादी / खरीदारी की सूची / Shopping list\n\n' +
+    state.shop.map(id => { const i = BY_ID[id];
+      return `• ${i.mr} — ${i.hi} — ${i.tr} (${i.en})`; }).join('\n');
+}
+document.getElementById('copyShop').onclick = () => {
+  if (!state.shop.length) return toast('List is empty');
+  const t = shopMessage();
+  document.getElementById('shopText').textContent = t;
+  document.getElementById('shopTextCard').style.display='block';
+  copy(t);
+};
+document.getElementById('clearShop').onclick = () => { state.shop=[]; save(); renderShop(); };
+
+function copy(t){
+  navigator.clipboard ? navigator.clipboard.writeText(t).then(()=>toast('Copied'), ()=>toast('Select and copy below'))
+                      : toast('Select and copy below');
+}
+
+/* ---------------- go ---------------- */
+renderPantry();
+renderMenu();
+</script>
+</body>
+</html>
