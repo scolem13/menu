@@ -1,0 +1,404 @@
+<title>Menu Shortlist</title>
+<style>
+:root{
+  --paper:#F4F2EF; --surface:#FFFFFF; --sunk:#EBE7E3;
+  --ink:#22201F; --muted:#78716E; --faint:#A9A19E;
+  --line:#DFD9D5; --line-soft:#EBE6E2;
+  --accent:#2F5D62; --accent-soft:#E2EDED;
+  --keep:#3F6B45; --keep-soft:#E6EFE6;
+  --cut:#9A4436; --cut-soft:#F7E7E3;
+  --gold:#9A7614;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --serif:"Iowan Old Style",Georgia,"Times New Roman",serif;
+  --dev:"Noto Sans Devanagari","Nirmala UI","Kohinoor Devanagari",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#181717; --surface:#211F1F; --sunk:#1C1B1B;
+    --ink:#EDEAE8; --muted:#9C9491; --faint:#6E6764;
+    --line:#363231; --line-soft:#2A2726;
+    --accent:#7FB3B8; --accent-soft:#20302F;
+    --keep:#8FBE93; --keep-soft:#1E2A1F;
+    --cut:#D9907F; --cut-soft:#33211D;
+    --gold:#D2A94A;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#181717; --surface:#211F1F; --sunk:#1C1B1B;
+  --ink:#EDEAE8; --muted:#9C9491; --faint:#6E6764;
+  --line:#363231; --line-soft:#2A2726;
+  --accent:#7FB3B8; --accent-soft:#20302F;
+  --keep:#8FBE93; --keep-soft:#1E2A1F;
+  --cut:#D9907F; --cut-soft:#33211D;
+  --gold:#D2A94A;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+.wrap{max-width:880px;margin:0 auto;padding:0 20px 120px}
+
+header{padding:40px 0 20px}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-family:var(--serif);font-size:clamp(28px,5vw,38px);line-height:1.15;margin:0 0 10px;text-wrap:balance;letter-spacing:-.01em}
+.lede{font-size:16px;color:var(--muted);max-width:62ch;margin:0}
+.lede b{color:var(--ink);font-weight:600}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:20px 0 0;padding:14px 16px;background:var(--sunk);border-radius:4px;font-size:13px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend .tag{margin:0}
+
+.bar{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--line);margin:22px -20px 0;padding:10px 20px}
+.bar-in{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tally{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.tally b{font-size:15px}
+.tally .k b{color:var(--keep)} .tally .c b{color:var(--cut)}
+.grow{flex:1}
+.filt{font-family:var(--sans);font-size:12.5px;padding:5px 11px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:99px;cursor:pointer}
+.filt[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.filt:focus-visible,.act:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+section{padding-top:34px}
+.sh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding-bottom:7px;margin-bottom:12px}
+.sh h2{font-family:var(--serif);font-size:21px;margin:0}
+.sh .mr{font-family:var(--dev);font-size:14px;color:var(--muted)}
+.sh .bulk{margin-left:auto;display:flex;gap:6px}
+.btn{font-size:11.5px;font-family:var(--sans);padding:4px 10px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:3px;cursor:pointer}
+.btn:hover{color:var(--ink);border-color:var(--muted)}
+
+.row{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:start;
+  background:var(--surface);border:1px solid var(--line-soft);border-left:3px solid var(--line);
+  border-radius:4px;padding:12px 14px;margin-bottom:5px}
+.row[data-v="1"]{border-left-color:var(--keep);background:var(--keep-soft)}
+.row[data-v="0"]{border-left-color:var(--cut);opacity:.5}
+.row.hide{display:none}
+.nm{font-family:var(--serif);font-size:17px;font-weight:600;line-height:1.3}
+.nm .mr{font-family:var(--dev);font-size:14px;font-weight:400;color:var(--muted);margin-left:8px}
+.tr{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.02em;margin-top:2px}
+.desc{font-size:13.5px;color:var(--muted);margin-top:5px;max-width:64ch}
+.adapt{font-size:12.5px;color:var(--gold);margin-top:5px;max-width:64ch}
+.adapt::before{content:"Adapt · ";font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:2px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.tag.g{background:var(--accent-soft);color:var(--accent)}
+.tag.b{background:var(--keep-soft);color:var(--keep)}
+
+.acts{display:flex;gap:5px}
+.act{font-size:12.5px;font-weight:600;font-family:var(--sans);padding:8px 13px;border:1px solid var(--line);
+  background:transparent;color:var(--muted);border-radius:3px;cursor:pointer;min-width:56px}
+.act:hover{border-color:var(--muted);color:var(--ink)}
+.act[data-v="1"][aria-pressed="true"]{background:var(--keep);border-color:var(--keep);color:var(--surface)}
+.act[data-v="0"][aria-pressed="true"]{background:var(--cut);border-color:var(--cut);color:var(--surface)}
+:root[data-theme="dark"] .act[aria-pressed="true"],
+:root:not([data-theme="light"]) .act[aria-pressed="true"]{color:#181717}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .act[aria-pressed="true"]{color:#fff}}
+
+@media (max-width:600px){
+  .row{grid-template-columns:1fr}
+  .acts{display:grid;grid-template-columns:1fr 1fr}
+}
+
+.footer{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:11px 20px;box-shadow:0 -2px 14px rgba(0,0,0,.07)}
+.footer-in{max-width:880px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.footer-in .m{flex:1;font-size:13px;color:var(--muted)}
+.go{font-size:14px;font-weight:600;font-family:var(--sans);background:var(--accent);color:var(--paper);
+  border:1px solid var(--accent);border-radius:3px;padding:10px 18px;cursor:pointer;white-space:nowrap}
+.go:hover{filter:brightness(1.1)}
+.go.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
+
+dialog{border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);
+  max-width:680px;width:calc(100% - 32px);padding:0;box-shadow:0 14px 44px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(20,18,18,.5)}
+.dlg{padding:22px}
+.dlg h3{font-family:var(--serif);font-size:20px;margin:0 0 4px}
+.dlg p{margin:0 0 14px;font-size:13.5px;color:var(--muted)}
+pre{background:var(--sunk);border:1px solid var(--line);border-radius:4px;padding:12px;
+  font:12px/1.65 var(--mono);white-space:pre-wrap;word-break:break-word;max-height:44vh;overflow:auto;margin:0 0 14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="kicker">Step one · Sean &amp; Sarah</p>
+  <h1>Cut the list before Sonali sees it</h1>
+  <p class="lede">All 105 dishes that survived the dairy, chili and deep-fry filter. Mark <b>Keep</b> for anything you'd genuinely eat and <b>Cut</b> for anything you wouldn't — whatever you keep becomes the list she rates. Cut freely; a shorter list gets a more honest answer from her.</p>
+  <div class="legend">
+    <span><span class="tag b">Basil</span> soft and mild enough for the toddler</span>
+    <span><span class="tag">Keeps</span> good as leftovers later in the day</span>
+    <span><span class="tag">Quick</span> roughly 25 min or less</span>
+    <span><span class="tag g">Grinder</span> needs the mixer that's still coming</span>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="bar-in">
+    <span class="tally"><span class="k">keep <b id="tK">0</b></span> · <span class="c">cut <b id="tC">0</b></span> · left <b id="tU">0</b></span>
+    <span class="grow"></span>
+    <button class="filt" id="fUn" type="button" aria-pressed="false">Undecided only</button>
+    <button class="filt" id="fNoG" type="button" aria-pressed="false">Hide grinder</button>
+    <button class="filt" id="fB" type="button" aria-pressed="false">Basil-friendly only</button>
+  </div>
+</div>
+
+<main id="list"></main>
+</div>
+
+<div class="footer">
+  <div class="footer-in">
+    <span class="m" id="msg">Saves as you go.</span>
+    <button class="go ghost" id="resetBtn" type="button">Reset</button>
+    <button class="go" id="doneBtn" type="button">Show shortlist</button>
+  </div>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg">
+    <h3>Shortlist</h3>
+    <p>Paste this back into the chat and I'll trim Sonali's rating sheet to match.</p>
+    <pre id="out"></pre>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="go ghost" id="closeBtn" type="button">Back</button>
+      <button class="go" id="copyBtn" type="button">Copy</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+/* [id, marathi, translit, english, description, tags, adaptNote]
+   tags: g=grinder b=basil k=keeps q=quick */
+const SECTIONS = [
+{ id:'nashta', en:'Breakfast & snacks', mr:'नाश्ता', dishes:[
+ ['poha','पोहे','pohe','Poha','Flattened rice steamed soft with turmeric and a mustard-cumin tempering. The default Maharashtrian breakfast.','bkq'],
+ ['kanda-poha','कांदा पोहे','kanda pohe','Onion poha','Poha with a lot of softened onion, peanuts and lemon. Sweeter and richer than plain.','kq'],
+ ['upma','उपमा','upma','Upma','Roasted semolina cooked to a soft savoury porridge with carrot, peas and curry leaves.','bq'],
+ ['sabudana-khichdi','साबुदाणा खिचडी','sabudana khichdi','Sago khichdi','Soaked tapioca pearls tossed with crushed peanuts and potato. Chewy, rich, filling.','q','Normally has green chili and is finished in ghee — both easily left out.'],
+ ['thalipeeth','थालीपीठ','thalipeeth','Multigrain flatbread','Mixed flours patted into a thick flatbread with onion and herbs, cooked on the tawa. Substantial.','g','Chili goes in the dough; ask for it plain.'],
+ ['ghavan','घावन / धिरडे','ghavan / dhirde','Rice crepe','Thin unfermented rice-flour crepe, ready immediately — no overnight batter like dosa.','bq','Traditionally rice is soaked and ground; rice flour works without the grinder.'],
+ ['kothimbir-vadi','कोथिंबीर वडी','kothimbir vadi','Coriander squares','Coriander and besan steamed into a firm cake, then cut into diamonds. Savoury and herby.','k','Steamed is the real dish; the pan-fry at the end is optional.'],
+ ['alu-vadi','अळू वडी','alu vadi','Colocasia rolls','Colocasia leaves layered with spiced besan paste, rolled, steamed and sliced into pinwheels. A project dish.','gk','Usually shallow-fried after steaming — can stop at steamed.'],
+ ['dhokla','ढोकळा','dhokla','Steamed besan cake','Fermented besan steamed into a light spongy square. Mildly sweet-sour.','gbk','Tempering normally carries green chili; skip it.'],
+ ['idli','इडली','idli','Idli','Steamed rice-and-lentil cakes. Soft, plain, endlessly toddler-friendly.','bk','Store batter needs no grinder; from scratch it does.'],
+ ['dosa','डोसा','dosa','Dosa','Fermented batter crisped thin on the tawa. Eaten with chutney or dal.','g','Store batter avoids the grinder.'],
+ ['uttapam','उत्तपम','uttapam','Uttapam','Thick soft dosa with onion and tomato pressed into the surface. More forgiving than dosa.','gb'],
+ ['sheera','शिरा','sheera','Semolina halwa','Semolina toasted and cooked with jaggery or sugar until it holds together. Warm and sweet.','bq','Normally roasted in ghee and loosened with milk — oil and water work.'],
+ ['chivda','चिवडा','chivda','Savoury poha mix','Dry snack mix of poha, peanuts and curry leaves. Keeps in a jar for weeks.','k','Ask for the roasted version rather than fried.'],
+ ['sandwich','सँडविच','sandwich','Vegetable sandwich','Bread with cucumber, tomato, onion and beetroot. Bombay street-style.','q','Normally buttered and layered with green chutney and cheese.'],
+ ['besan-eno-bread','बेसन-इनो ब्रेड','besan-eno bread','Steamed besan bread','The savoury steamed besan loaf she has already made here.','bk'],
+]},
+
+{ id:'dal', en:'Dals, amtis & usals', mr:'डाळी आणि उसळ', dishes:[
+ ['varan','वरण','varan','Plain toor dal','Toor dal boiled with turmeric and nothing else. The plainest thing on this list, eaten over rice.','bkq','Traditionally finished with ghee and a little jaggery.'],
+ ['amti','आमटी','amti','Maharashtrian amti','Toor dal with goda masala, jaggery and tamarind — sweet, sour and gently spiced at once. The everyday Maharashtrian dal.','k','Goda masala is mild by nature; ask her to hold the chili.'],
+ ['katachi-amti','कटाची आमटी','katachi amti','Chana dal stock amti','Thin, tangy dal made from the water left over from cooking chana dal. Traditionally served with puran poli.','k','Usually quite spiced.'],
+ ['moong-dal','मूग डाळ','moog dal','Yellow moong dal','Split moong boiled soft with a cumin-hing tempering. The gentlest dal — already a staple here.','bkq'],
+ ['masoor-dal','मसूर डाळ','masoor dal','Red lentil dal','Red lentils that collapse into a thick purée in about twenty minutes. Fastest dal there is.','bkq'],
+ ['dal-tadka','डाळ तडका','dal tadka','Dal tadka','North Indian toor/moong dal with a garlic-cumin tempering poured over at the end.','bk','Tempering is normally in ghee with dried red chili.'],
+ ['dal-fry','डाळ फ्राय','dal fry','Dal fry','Dal cooked into a sautéed onion-tomato-ginger-garlic base. Thicker and more savoury than tadka.','k','Usually has chili and garam masala.'],
+ ['matki-usal','मटकीची उसळ','matkichi usal','Moth bean sprouts','Sprouted moth beans in a thin brothy curry. Nutty, high protein, very Maharashtrian.','k','Traditionally quite hot; the base works mild.'],
+ ['vaal-usal','वालाची उसळ','valachi usal','Lima bean usal','Sprouted field beans, slightly bitter and buttery. A regional favourite that divides people.','k','Normally spiced hard to balance the bitterness.'],
+ ['chawli-usal','चवळीची उसळ','chavlichi usal','Black-eyed pea usal','Black-eyed peas in a light coconut-tinged curry. Mild and approachable as usals go.','k'],
+ ['kala-vatana','काळ्या वाटाण्याची उसळ','kalya vatanyachi usal','Black pea usal','Dried black peas in a dark Malvani-style gravy. Deep and earthy.','gk','Built on a hot roasted-coconut masala — needs real rework to go mild.'],
+ ['kala-chana','काळे चणे','kale chane','Black chickpea curry','Whole black chickpeas simmered with onion and tomato. Firm, nutty, filling.','k'],
+ ['chole','छोले','chole','Chickpea curry','White chickpeas in a dark tangy onion-tomato gravy with amchur and tea-darkened stock.','k','Chole masala is chili-forward; a mild version is a different dish but still good.'],
+ ['rajma','राजमा','rajma','Kidney bean curry','Kidney beans slow-cooked until the gravy thickens on its own. Comfort food over rice.','k','Usually finished with cream or ghee — skips fine.'],
+ ['sambar','सांबार','sambar','Sambar','Toor dal with tamarind, sambar powder and whatever vegetables are around — drumstick, pumpkin, carrot.','k','Sambar powder is chili-based; a milder blend is possible.'],
+ ['pithla','पिठलं','pithla','Besan curry','Besan whisked into water and cooked into a soft savoury curry in ten minutes. Eaten with bhakri.','bq','Normally sharp with green chili and garlic.'],
+ ['methi-pitla','मेथी पिठलं','methi pitla','Fenugreek besan curry','Pithla with fenugreek leaves stirred through. Faintly bitter, very good with jowar bhakri.','q'],
+ ['kokum-kadhi','कोकम कढी','kokum kadhi','Kokum kadhi','Despite the name, no dairy at all — kokum fruit and coconut milk, served cold. Sour, cooling, pink.','gq'],
+ ['sprouts-salad','मोड आलेले कडधान्य','mod alele kadadhanya','Sprout salad','Raw or lightly steamed sprouts with tomato, onion, lemon and coriander.','q'],
+]},
+
+{ id:'bhaji', en:'Vegetables', mr:'भाज्या', dishes:[
+ ['batata-bhaji','बटाट्याची भाजी','batatyachi bhaji','Potato sabzi','Boiled potato broken up and tempered with mustard, turmeric and curry leaves. Soft, yellow, universally eaten.','bkq'],
+ ['kobi-bhaji','कोबीची भाजी','kobichi bhaji','Cabbage sabzi','Shredded cabbage cooked down with peas and plenty of ginger and garlic. Slightly sweet.','bkq'],
+ ['flower-batata','फ्लॉवर-बटाटा भाजी','flower-batata bhaji','Cauliflower & potato','The standard pairing — both cut small and cooked dry with turmeric.','bkq'],
+ ['bhendi-bhaji','भेंडीची भाजी','bhendichi bhaji','Okra sabzi','Sliced okra cooked dry and uncovered so it stays firm rather than slippery.','q'],
+ ['bharli-bhendi','भरली भेंडी','bharli bhendi','Stuffed okra','Whole okra slit and packed with a besan-coconut-peanut masala. Fiddly, and much better than plain.','g','Stuffing masala normally has chili powder.'],
+ ['bharli-vangi','भरली वांगी','bharli vangi','Stuffed aubergine','Baby aubergines stuffed with peanut, coconut and goda masala, then simmered in their own gravy. A showpiece dish.','gk','Chili is in the stuffing, not the method.'],
+ ['vangyache-bharit','वांग्याचे भरीत','vangyache bharit','Smoked aubergine mash','Aubergine charred whole on the flame, peeled and mashed with onion. Smoky and soft.','bk','Often finished with curd or raw green chili.'],
+ ['tondli-bhaji','तोंडलीची भाजी','tondlichi bhaji','Ivy gourd sabzi','Ivy gourd sliced into batons and cooked dry with peanut powder. Mild and crunchy.','kq'],
+ ['dudhi-bhaji','दुधी भोपळ्याची भाजी','dudhi bhoplyachi bhaji','Bottle gourd sabzi','Bottle gourd cooked soft in its own water. Very plain and very easy to digest.','bq'],
+ ['dodka-bhaji','दोडक्याची भाजी','dodkyachi bhaji','Ridge gourd sabzi','Ridge gourd cooked until it collapses, slightly sweet. Often with a little dal or peanut.','bq'],
+ ['padwal-bhaji','पडवळाची भाजी','padvalachi bhaji','Snake gourd sabzi','Mild watery gourd, usually cooked with moong dal or coconut to give it body.','bq'],
+ ['karle-bhaji','कारल्याची भाजी','karlyachi bhaji','Bitter gourd sabzi','Genuinely bitter, usually tamed with onion and jaggery. An acquired taste and a hard sell for a toddler.','q'],
+ ['gavar-bhaji','गवारीची भाजी','gavarichi bhaji','Cluster bean sabzi','Cluster beans, firm and faintly bitter, cooked dry with peanut powder.','kq'],
+ ['bhopla-bhaji','भोपळ्याची भाजी','bhoplyachi bhaji','Pumpkin sabzi','Red pumpkin cooked soft with a little jaggery. Naturally sweet — easy toddler food.','bkq'],
+ ['gajar-bhaji','गाजराची भाजी','gajarachi bhaji','Carrot sabzi','Carrot cooked down with peas, sometimes coconut. Sweet and bright.','bkq'],
+ ['matar-bhaji','मटारची भाजी','matarchi bhaji','Green pea sabzi','Green peas cooked simply with potato or on their own. Sweet and soft.','bkq'],
+ ['beet-bhaji','बीटाची भाजी','beetachi bhaji','Beetroot sabzi','Grated beetroot cooked quickly with coconut and lemon. Sweet, earthy, dramatic colour.','bkq'],
+ ['ratale-bhaji','रताळ्याची भाजी','ratalyachi bhaji','Sweet potato sabzi','Boiled sweet potato lightly tempered with cumin. Sweet and soft.','bkq'],
+ ['palak-bhaji','पालकाची भाजी','palakachi bhaji','Spinach sabzi','Spinach wilted with garlic, sometimes with a handful of moong dal for body.','bq'],
+ ['methi-bhaji','मेथीची भाजी','methichi bhaji','Fenugreek sabzi','Fenugreek leaves with potato or onion. Distinctly bitter — the bitterness is the point.','q'],
+ ['shepu-bhaji','शेपूची भाजी','shepuchi bhaji','Dill sabzi','Dill greens cooked with moong dal. Strong aniseed smell that people either love or refuse.','q'],
+ ['math-bhaji','माठाची भाजी','mathachi bhaji','Amaranth sabzi','Amaranth greens wilted with garlic. Mild, like a softer spinach.','bq'],
+ ['ambadi-bhaji','अंबाडीची भाजी','ambadichi bhaji','Sorrel sabzi','Sour sorrel leaves, usually cooked with dal to balance the acidity. Regional and unusual.','q'],
+ ['shevga-bhaji','शेवग्याची भाजी','shevgyachi bhaji','Drumstick sabzi','Drumstick pods cooked in a light gravy. You eat the pulp and discard the fibrous shell.','k','The pods need sucking clean — not toddler food.'],
+ ['mix-veg','मिक्स भाजी','mix bhaji','Mixed vegetables','Whatever is in the fridge, cut small and cooked dry together. The everyday fallback.','bkq'],
+ ['aloo-gobi','आलू गोबी','aloo gobi','Potato & cauliflower','The North Indian version — drier, with ginger, cumin and coriander powder.','bkq'],
+ ['jeera-aloo','जिरा आलू','jeera aloo','Cumin potatoes','Boiled potato cubes tossed hard in cumin. Barely a recipe, always eaten.','bkq'],
+ ['kanda-bhaji','कांद्याची भाजी','kandyachi bhaji','Onion sabzi','Onions cooked slowly until sweet, sometimes thickened with besan.','q'],
+ ['capsicum-besan','ढोबळी मिरची-बेसन','dhobli mirchi-besan','Capsicum besan sabzi','Sweet capsicum cooked with besan that toasts and coats the pieces. Nutty.','q'],
+ ['steamed-veg','वाफवलेल्या भाज्या','vaphavlelya bhajya','Steamed vegetables','Broccoli, cauliflower and carrot steamed plain. Already a fixture here.','bq'],
+]},
+
+{ id:'bhaat', en:'Rice', mr:'भात', dishes:[
+ ['sada-bhaat','साधा भात','sada bhaat','Plain rice','Plain boiled rice.','bkq'],
+ ['varan-bhaat','वरण भात','varan bhaat','Dal & rice','Plain dal poured over plain rice. The most basic comfort meal in the state.','bkq','Normally has a spoon of ghee on top.'],
+ ['khichdi','खिचडी','khichdi','Khichdi','Rice and moong dal cooked together until soft. The one-pot default.','bkq'],
+ ['palak-khichdi','पालक खिचडी','palak khichdi','Spinach khichdi','Khichdi with spinach cooked through it — the one she has already made here.','bkq'],
+ ['masale-bhat','मसाले भात','masale bhat','Spiced Maharashtrian rice','Rice cooked with goda masala, vegetables and cashews. The festive rice dish.','k','Goda masala rather than chili does most of the work — adapts well.'],
+ ['veg-pulao','भाजी पुलाव','bhaji pulav','Vegetable pulao','Rice with carrot, peas and beans, tempered with bay leaf and cinnamon. No chili needed.','bkq'],
+ ['jeera-rice','जिरा भात','jira bhaat','Cumin rice','Plain rice with a cumin tempering. Five minutes of work.','bkq'],
+ ['fodnicha-bhaat','फोडणीचा भात','fodnicha bhaat','Tempered leftover rice','Last night&rsquo;s rice refried with mustard, turmeric and peanuts. Purpose-built for leftovers.','bq'],
+ ['veg-biryani','व्हेज बिर्याणी','veg biryani','Vegetable biryani','Layered rice and vegetables steamed together. The moringa-and-cashew version you already planned.','gk','Normally curd-marinated and chili-heavy; the ground herb paste replaces both.'],
+ ['tomato-bhaat','टोमॅटो भात','tomato bhaat','Tomato rice','Rice cooked in a tomato base. Tangy and a good colour.','bkq'],
+ ['lemon-rice','लिंबू भात','limbu bhaat','Lemon rice','Rice tossed with lemon, turmeric, peanuts and curry leaves. Sharp and clean.','bkq'],
+]},
+
+{ id:'poli', en:'Breads', mr:'पोळी आणि भाकरी', dishes:[
+ ['poli','पोळी / चपाती','poli / chapati','Chapati','Everyday wheat flatbread. Needs the rolling pin.','bkq'],
+ ['phulka','फुलका','phulka','Puffed roti','Chapati puffed directly on the flame. Lighter, best straight off the fire.','bq'],
+ ['jowar-bhakri','ज्वारीची भाकरी','jwarichi bhakri','Sorghum flatbread','Gluten-free sorghum flatbread patted by hand. Rustic, filling, real skill to make well.','k'],
+ ['bajra-bhakri','बाजरीची भाकरी','bajrichi bhakri','Millet flatbread','Pearl millet version — darker, denser, warming. A winter bread.','k'],
+ ['tandul-bhakri','तांदळाची भाकरी','tandalachi bhakri','Rice flatbread','Soft white rice-flour flatbread from the coast. Mild and pliable.','b'],
+ ['paratha','पराठा','paratha','Plain paratha','Layered flatbread cooked with oil on the tawa. Richer than chapati.','kq'],
+ ['stuffed-paratha','भरलेला पराठा','bharlela paratha','Stuffed paratha','Filled with potato, cauliflower or grated carrot. A meal by itself.','gk','Filling normally has chili; ghee on top is optional.'],
+ ['masala-poli','मसाला पोळी','masala poli','Spiced flatbread','Chapati dough worked with herbs and spices before rolling.','kq'],
+]},
+
+{ id:'chutney', en:'Chutneys & salads', mr:'चटणी आणि कोशिंबीर', dishes:[
+ ['naral-chutney','नारळाची चटणी','naralachi chatni','Coconut chutney','Fresh coconut ground with ginger and roasted gram. Eaten with idli and dosa.','gq','Green chili is standard and easy to drop.'],
+ ['kothimbir-chutney','कोथिंबिरीची चटणी','kothimbirichi chatni','Coriander chutney','Coriander ground with lemon, ginger and peanut. Bright green and sharp.','gq','Chili is standard; peanut and lemon carry it without.'],
+ ['pudina-chutney','पुदिन्याची चटणी','pudinyachi chatni','Mint chutney','Mint and coriander together. Cooling.','gq','As above.'],
+ ['shengdana-chutney','शेंगदाण्याची चटणी','shengdanyachi chatni','Dry peanut chutney','Roasted peanuts ground coarse with garlic into a dry powder. Sprinkled on everything, keeps for weeks.','gk','Normally has red chili powder; garlic-peanut alone is still good.'],
+ ['tomato-chutney','टोमॅटोची चटणी','tomatochi chatni','Tomato chutney','Tomato cooked down with garlic into a thick relish.','gq'],
+ ['jawas-chutney','जवसाची चटणी','javasachi chatni','Flaxseed chutney','Roasted flax ground with garlic into a dry powder. Nutty and very Maharashtrian.','gk','Chili powder is standard but not structural.'],
+ ['khamang-kakdi','खमंग काकडी','khamang kakdi','Cucumber salad','Cucumber with crushed peanut, lemon and coriander. Crunchy and fresh.','bq'],
+ ['tomato-koshimbir','टोमॅटो-कांदा कोशिंबीर','tomato-kanda koshimbir','Tomato & onion salad','Chopped raw tomato and onion with lemon and coriander.','q'],
+ ['beet-koshimbir','बीटाची कोशिंबीर','beetachi koshimbir','Beetroot salad','Grated raw or boiled beetroot with peanut and lemon.','bq'],
+ ['papad','पापड','papad','Papad','Lentil wafer. Roasted on the flame rather than fried.','q'],
+]},
+
+{ id:'soup', en:'Soups & light dishes', mr:'सूप', dishes:[
+ ['tomato-soup','टोमॅटोचे सूप','tomatoche soup','Tomato soup','Tomato and carrot boiled soft and mashed by hand.','bq','Skip the cream-and-butter finish.'],
+ ['veg-soup','भाज्यांचे सूप','bhajyanche soup','Vegetable soup','Whatever vegetables are around, boiled soft.','bkq'],
+ ['palak-dal-soup','पालक-डाळीचे सूप','palak-dalyache soup','Spinach & dal soup','Spinach and moong dal with garlic, ginger and turmeric, mashed with a ladle. The sore-throat soup.','bkq'],
+ ['jeera-chaha','जिऱ्याचा चहा','jiryacha chaha','Cumin tea','Cumin seeds boiled in water. No milk. Drunk after meals for digestion.','bq'],
+ ['limbu-sarbat','लिंबू सरबत','limbu sarbat','Lemon sherbet','Fresh lemon, water, a little jaggery or sugar, sometimes salt.','bq'],
+ ['baby-food','बाळासाठी मऊ जेवण','balasathi mau jevan','Soft food for Basil','Extra-soft mashed khichdi, vegetables or dal made specifically for the toddler.','bq'],
+]},
+
+{ id:'god', en:'Sweets', mr:'गोड पदार्थ', dishes:[
+ ['puran-poli','पुरणपोळी','puran poli','Sweet lentil flatbread','Chana dal and jaggery ground into a sweet paste, stuffed into dough and rolled thin. A festival dish and a full afternoon of work.','gk','Normally served swimming in ghee.'],
+ ['modak','उकडीचे मोदक','ukadiche modak','Steamed modak','Rice-flour dumplings filled with coconut and jaggery, pleated by hand and steamed. The Ganpati sweet.','bk','Ghee is served alongside, not cooked in.'],
+ ['til-ladoo','तिळाचे लाडू','tilache ladoo','Sesame ladoo','Toasted sesame bound with jaggery and rolled into balls. Made in winter. Keeps for weeks.','k'],
+ ['chikki','चिक्की','chikki','Peanut brittle','Peanuts set in hardened jaggery. Keeps indefinitely.','k','Hard — not for the toddler.'],
+ ['naral-vadi','नारळाची वडी','naralachi vadi','Coconut burfi','Fresh coconut cooked with jaggery and set into squares.','bk','The quick version uses milk or khoya; the jaggery-only version does not.'],
+]},
+];
+
+const TAGN = { g:['Grinder','g'], b:['Basil','b'], k:['Keeps',''], q:['Quick',''] };
+const ALL = SECTIONS.flatMap(s => s.dishes.map(d => d[0]));
+const KEY = 'menu-triage-v1';
+let picks = {};
+try { picks = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){}
+const persist = () => { try{ localStorage.setItem(KEY, JSON.stringify(picks)); }catch(e){} };
+
+const list = document.getElementById('list');
+list.innerHTML = SECTIONS.map(s => `
+  <section id="s-${s.id}">
+    <div class="sh">
+      <h2>${s.en}</h2><span class="mr">${s.mr}</span>
+      <span class="bulk">
+        <button class="btn" type="button" data-all="1" data-sec="${s.id}">Keep all</button>
+        <button class="btn" type="button" data-all="0" data-sec="${s.id}">Cut all</button>
+      </span>
+    </div>
+    ${s.dishes.map(([id,mr,tr,en,desc,tags,adapt]) => `
+      <div class="row" id="r-${id}" data-tags="${tags}" ${id in picks?`data-v="${picks[id]}"`:''}>
+        <div>
+          <div class="nm">${en}<span class="mr">${mr}</span></div>
+          <div class="tr">${tr}</div>
+          <p class="desc">${desc}</p>
+          ${adapt?`<p class="adapt">${adapt}</p>`:''}
+          <div class="tags">${[...tags].map(t=>`<span class="tag ${TAGN[t][1]}">${TAGN[t][0]}</span>`).join('')}</div>
+        </div>
+        <div class="acts">
+          <button class="act" type="button" data-id="${id}" data-v="1" aria-pressed="${picks[id]===1}">Keep</button>
+          <button class="act" type="button" data-id="${id}" data-v="0" aria-pressed="${picks[id]===0}">Cut</button>
+        </div>
+      </div>`).join('')}
+  </section>`).join('');
+
+function set(id, v){
+  picks[id] = v;
+  const r = document.getElementById('r-'+id);
+  r.dataset.v = v;
+  r.querySelectorAll('.act').forEach(a => a.setAttribute('aria-pressed', +a.dataset.v === v));
+}
+list.addEventListener('click', e => {
+  const b = e.target.closest('.act');
+  if (b){ set(b.dataset.id, +b.dataset.v); persist(); tally(); return; }
+  const k = e.target.closest('[data-all]');
+  if (k){
+    SECTIONS.find(s=>s.id===k.dataset.sec).dishes.forEach(d => set(d[0], +k.dataset.all));
+    persist(); tally();
+  }
+});
+
+function tally(){
+  const K = ALL.filter(i=>picks[i]===1).length, C = ALL.filter(i=>picks[i]===0).length;
+  document.getElementById('tK').textContent = K;
+  document.getElementById('tC').textContent = C;
+  document.getElementById('tU').textContent = ALL.length - K - C;
+  document.getElementById('msg').textContent = (K+C === ALL.length)
+    ? `Done — ${K} dishes go to Sonali.` : 'Saves as you go.';
+  applyFilters();
+}
+
+const F = { un:false, nog:false, b:false };
+function applyFilters(){
+  document.querySelectorAll('.row').forEach(r => {
+    const id = r.id.slice(2), t = r.dataset.tags;
+    const hide = (F.un && id in picks) || (F.nog && t.includes('g')) || (F.b && !t.includes('b'));
+    r.classList.toggle('hide', hide);
+  });
+}
+const bind = (el, key) => {
+  const b = document.getElementById(el);
+  b.onclick = () => { F[key] = !F[key]; b.setAttribute('aria-pressed', F[key]); applyFilters(); };
+};
+bind('fUn','un'); bind('fNoG','nog'); bind('fB','b');
+
+const dlg = document.getElementById('dlg');
+document.getElementById('doneBtn').onclick = () => {
+  const K = ALL.filter(i=>picks[i]===1), C = ALL.filter(i=>picks[i]===0), U = ALL.filter(i=>!(i in picks));
+  document.getElementById('out').textContent = [
+    `MENU SHORTLIST — keep ${K.length}, cut ${C.length}, undecided ${U.length}`,
+    '', 'KEEP: ' + (K.join(', ') || '—'),
+    '', 'CUT: ' + (C.join(', ') || '—'),
+    '', 'UNDECIDED: ' + (U.join(', ') || '—'),
+  ].join('\n');
+  dlg.showModal();
+};
+document.getElementById('closeBtn').onclick = () => dlg.close();
+document.getElementById('copyBtn').onclick = () => {
+  const t = document.getElementById('out').textContent, btn = document.getElementById('copyBtn');
+  const ok = () => { btn.textContent='Copied'; setTimeout(()=>btn.textContent='Copy',1600); };
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, sel); else sel();
+  function sel(){
+    const r = document.createRange(); r.selectNodeContents(document.getElementById('out'));
+    const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    btn.textContent='Press ⌘C'; setTimeout(()=>btn.textContent='Copy',2400);
+  }
+};
+document.getElementById('resetBtn').onclick = () => {
+  if (!confirm('Clear all decisions?')) return;
+  picks = {}; persist();
+  document.querySelectorAll('.row').forEach(r=>delete r.dataset.v);
+  document.querySelectorAll('.act').forEach(a=>a.setAttribute('aria-pressed','false'));
+  tally();
+};
+tally();
+</script>

@@ -1,0 +1,482 @@
+<title>Sonali's Recipe Book</title>
+<style>
+:root{
+  --paper:#F9F6F3;
+  --surface:#FFFFFF;
+  --ink:#241C22;
+  --muted:#7A6E73;
+  --line:#E4DCD9;
+  --line-soft:#EFE9E6;
+  --accent:#8E2751;
+  --accent-soft:#F6E6ED;
+  --gold:#B07812;
+  --gold-soft:#FAF0DB;
+  --sage:#4F6B4A;
+  --sage-soft:#E8EFE6;
+  --shadow:0 1px 2px rgba(36,28,34,.05);
+  --dev:"Noto Sans Devanagari","Nirmala UI","Mukta","Kohinoor Devanagari","Devanagari Sangam MN",sans-serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#191316; --surface:#221A1E; --ink:#F2EBEE; --muted:#A2939A;
+    --line:#3A2E34; --line-soft:#2E2429;
+    --accent:#E88BAE; --accent-soft:#3A1F2B;
+    --gold:#E0AC4E; --gold-soft:#382B14;
+    --sage:#9CBE94; --sage-soft:#25321F;
+    --shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#191316; --surface:#221A1E; --ink:#F2EBEE; --muted:#A2939A;
+  --line:#3A2E34; --line-soft:#2E2429;
+  --accent:#E88BAE; --accent-soft:#3A1F2B;
+  --gold:#E0AC4E; --gold-soft:#382B14;
+  --sage:#9CBE94; --sage-soft:#25321F;
+  --shadow:0 1px 2px rgba(0,0,0,.3);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans); font-size:16px; line-height:1.5;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:760px;margin:0 auto;padding:0 18px 140px}
+
+/* ---------- masthead ---------- */
+.masthead{padding:44px 0 26px;border-bottom:2px solid var(--ink)}
+.eyebrow{
+  font-family:var(--serif);font-style:italic;font-size:15px;color:var(--accent);
+  margin:0 0 10px;
+}
+h1{
+  font-family:var(--dev);font-weight:700;font-size:clamp(30px,7vw,44px);
+  line-height:1.25;margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em;
+}
+.h1-en{font-family:var(--serif);font-size:17px;color:var(--muted);margin:0}
+.intro{
+  margin:22px 0 0;padding:16px 18px;background:var(--accent-soft);
+  border-radius:3px;
+}
+.intro p{margin:0}
+.intro .mr{font-family:var(--dev);font-size:18px;line-height:1.75}
+.intro .en{font-size:14px;color:var(--muted);margin-top:10px;line-height:1.6}
+
+/* ---------- sticky bar ---------- */
+.bar{
+  position:sticky;top:0;z-index:20;background:var(--paper);
+  border-bottom:1px solid var(--line);margin:0 -18px;padding:0 18px;
+}
+.bar-inner{display:flex;align-items:center;gap:14px;height:52px}
+.count{
+  font-family:var(--dev);font-size:15px;font-weight:600;white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.track{flex:1;height:5px;background:var(--line-soft);border-radius:99px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--sage);transition:width .25s ease}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{
+  flex:none;font-family:var(--dev);font-size:14px;padding:5px 12px;
+  border:1px solid var(--line);border-radius:99px;background:var(--surface);
+  color:var(--muted);cursor:pointer;white-space:nowrap;
+}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ---------- sections ---------- */
+section{padding-top:40px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;
+  border-bottom:1px solid var(--line);padding-bottom:8px}
+.sec-head h2{font-family:var(--dev);font-size:24px;font-weight:700;margin:0;line-height:1.3}
+.sec-head .en{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted)}
+.sec-head .n{margin-left:auto;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.dish{
+  display:grid;grid-template-columns:1fr auto;gap:12px 18px;align-items:center;
+  background:var(--surface);border:1px solid var(--line-soft);border-radius:4px;
+  padding:12px 14px;margin-bottom:6px;box-shadow:var(--shadow);
+  border-left:3px solid transparent;transition:border-left-color .15s;
+}
+.dish[data-v="2"]{border-left-color:var(--gold)}
+.dish[data-v="1"]{border-left-color:var(--sage)}
+.dish[data-v="0"]{border-left-color:var(--line);opacity:.55}
+.dish .name{font-family:var(--dev);font-size:20px;font-weight:600;line-height:1.4}
+.dish .sub{font-size:12.5px;color:var(--muted);margin-top:1px}
+.dish .sub i{font-style:italic}
+
+.opts{display:flex;gap:5px}
+.opt{
+  font-family:var(--dev);font-size:14px;line-height:1.2;
+  border:1px solid var(--line);background:transparent;color:var(--muted);
+  border-radius:3px;padding:9px 11px;cursor:pointer;min-width:74px;text-align:center;
+}
+.opt .en{display:block;font-family:var(--sans);font-size:10px;letter-spacing:.05em;
+  text-transform:uppercase;margin-top:3px;opacity:.75}
+.opt:hover{border-color:var(--muted);color:var(--ink)}
+.opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.opt[aria-pressed="true"]{font-weight:700}
+.opt[data-v="2"][aria-pressed="true"]{background:var(--gold-soft);border-color:var(--gold);color:var(--gold)}
+.opt[data-v="1"][aria-pressed="true"]{background:var(--sage-soft);border-color:var(--sage);color:var(--sage)}
+.opt[data-v="0"][aria-pressed="true"]{background:var(--line-soft);border-color:var(--muted);color:var(--muted)}
+
+@media (max-width:560px){
+  .dish{grid-template-columns:1fr}
+  .opts{display:grid;grid-template-columns:1fr 1fr 1fr}
+  .opt{min-width:0}
+}
+
+/* ---------- extras ---------- */
+textarea{
+  width:100%;min-height:120px;padding:12px;border-radius:4px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);font-family:var(--dev);font-size:17px;resize:vertical;
+}
+textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+.footer-bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);
+  border-top:1px solid var(--line);padding:12px 18px;
+  box-shadow:0 -2px 12px rgba(36,28,34,.06);
+}
+.footer-in{max-width:760px;margin:0 auto;display:flex;gap:12px;align-items:center}
+.footer-in .msg{font-family:var(--dev);font-size:14px;color:var(--muted);flex:1;line-height:1.4}
+button.action{
+  font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;
+  background:var(--accent);color:var(--surface);border:1px solid var(--accent);
+  border-radius:3px;padding:11px 20px;white-space:nowrap;
+}
+:root[data-theme="dark"] button.action,
+:root:not([data-theme="light"]) button.action{color:#191316}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]) button.action{color:#fff}
+}
+button.action:hover{filter:brightness(1.08)}
+button.ghost{background:transparent;color:var(--muted);border-color:var(--line)}
+button.ghost:hover{color:var(--ink);border-color:var(--muted)}
+
+dialog{
+  border:1px solid var(--line);border-radius:5px;background:var(--surface);color:var(--ink);
+  max-width:640px;width:calc(100% - 32px);padding:0;box-shadow:0 12px 40px rgba(36,28,34,.22);
+}
+dialog::backdrop{background:rgba(36,28,34,.45)}
+.dlg{padding:22px}
+.dlg h3{font-family:var(--serif);font-size:20px;margin:0 0 4px}
+.dlg p{margin:0 0 14px;font-size:14px;color:var(--muted)}
+pre{
+  background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:12px;
+  font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;
+  white-space:pre-wrap;word-break:break-word;max-height:46vh;overflow:auto;margin:0 0 14px;
+}
+.stats{display:flex;gap:18px;margin:0 0 14px;font-size:13px;flex-wrap:wrap}
+.stats b{font-variant-numeric:tabular-nums;font-size:19px;display:block;font-family:var(--serif)}
+.stats .s-often b{color:var(--gold)} .stats .s-can b{color:var(--sage)} .stats .s-no b{color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">For Sonali Didi</p>
+  <h1>तुम्हाला काय बनवायला आवडतं?</h1>
+  <p class="h1-en">What do you like to cook?</p>
+
+  <div class="intro">
+    <p class="mr">दीदी, खाली पदार्थांची यादी आहे. प्रत्येक पदार्थासमोर तीन पर्याय आहेत — <b>आवडतं</b>, <b>ठीक आहे</b>, किंवा <b>नको</b>. तुमच्या मनाला जे वाटेल तेच निवडा.<br><br>जे पदार्थ तुम्हाला करायला आवडतात, तेच आम्हाला जास्त वेळा खायला आवडतील. त्यामुळे मोकळेपणाने <b>नको</b> म्हणा — त्यात काहीच अडचण नाही.<br><br>यातले काही पदार्थ तुम्ही कदाचित तूप, दही किंवा तिखट घालून करत असाल. काही हरकत नाही — कमी तिखट आणि दुधाशिवाय कसं करायचं ते आपण नंतर ठरवू.</p>
+    <p class="en">Framed as preference, not ability — “rather not” lets her pass on anything without having to explain why. Already filtered to dishes that work without dairy, chili, or deep-frying.</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="bar-inner">
+    <span class="count" id="count">० / ०</span>
+    <div class="track"><div class="fill" id="fill"></div></div>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<main id="list"></main>
+
+<section id="extras">
+  <div class="sec-head">
+    <h2>आणखी काही?</h2>
+    <span class="en">Anything we missed</span>
+  </div>
+  <p style="font-family:var(--dev);font-size:17px;margin:0 0 12px">
+    तुम्हाला आवडणारा एखादा पदार्थ या यादीत नाही का? इथे लिहा.
+  </p>
+  <textarea id="notes" placeholder="उदा. मऊ भात, माझ्या आईची भाजी, ..."></textarea>
+</section>
+
+</div>
+
+<div class="footer-bar">
+  <div class="footer-in">
+    <span class="msg" id="msg">तुमची उत्तरं आपोआप सेव्ह होतात.</span>
+    <button class="action ghost" id="resetBtn" type="button">Reset</button>
+    <button class="action" id="doneBtn" type="button">Show results</button>
+  </div>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg">
+    <h3>Results</h3>
+    <p>Sean — copy this block and paste it back into the chat.</p>
+    <div class="stats">
+      <span class="s-often"><b id="n2">0</b>loves making</span>
+      <span class="s-can"><b id="n1">0</b>happy to make</span>
+      <span class="s-no"><b id="n0">0</b>rather not</span>
+      <span class="s-un"><b id="nu">0</b>unanswered</span>
+    </div>
+    <pre id="out"></pre>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="action ghost" id="closeBtn" type="button">Back</button>
+      <button class="action" id="copyBtn" type="button">Copy</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+const SECTIONS = [
+  { id:'nashta', mr:'नाश्ता आणि फराळ', en:'Breakfast & snacks', dishes:[
+    ['poha','पोहे','pohe','Poha'],
+    ['kanda-poha','कांदा पोहे','kanda pohe','Onion poha'],
+    ['upma','उपमा','upma','Upma'],
+    ['sabudana-khichdi','साबुदाणा खिचडी','sabudana khichdi','Sago khichdi'],
+    ['thalipeeth','थालीपीठ','thalipeeth','Multigrain flatbread'],
+    ['ghavan','घावन / धिरडे','ghavan / dhirde','Rice crepe'],
+    ['kothimbir-vadi','कोथिंबीर वडी','kothimbir vadi','Coriander-besan squares'],
+    ['alu-vadi','अळू वडी','alu vadi','Colocasia leaf rolls'],
+    ['dhokla','ढोकळा','dhokla','Steamed besan cake'],
+    ['idli','इडली','idli','Idli'],
+    ['dosa','डोसा','dosa','Dosa'],
+    ['uttapam','उत्तपम','uttapam','Uttapam'],
+    ['sheera','शिरा','sheera','Semolina halwa'],
+    ['chivda','चिवडा','chivda','Savoury poha mix'],
+    ['sandwich','सँडविच','sandwich','Sandwich'],
+    ['besan-eno-bread','बेसन-इनो ब्रेड','besan-eno bread','Steamed besan bread'],
+  ]},
+
+  { id:'dal', mr:'डाळी, आमटी आणि उसळ', en:'Dals, amtis & usals', dishes:[
+    ['varan','वरण','varan','Plain toor dal'],
+    ['amti','आमटी','amti','Maharashtrian sweet-sour dal'],
+    ['katachi-amti','कटाची आमटी','katachi amti','Chana dal stock amti'],
+    ['moong-dal','मूग डाळ','moog dal','Yellow moong dal'],
+    ['masoor-dal','मसूर डाळ','masoor dal','Red lentil dal'],
+    ['dal-tadka','डाळ तडका','dal tadka','Dal tadka'],
+    ['dal-fry','डाळ फ्राय','dal fry','Dal fry'],
+    ['matki-usal','मटकीची उसळ','matkichi usal','Moth bean sprouts'],
+    ['vaal-usal','वालाची उसळ / डाळिंबी','valachi usal / dalimbi','Lima bean usal'],
+    ['chawli-usal','चवळीची उसळ','chavlichi usal','Black-eyed pea usal'],
+    ['kala-vatana','काळ्या वाटाण्याची उसळ','kalya vatanyachi usal','Black pea usal'],
+    ['kala-chana','काळे चणे','kale chane','Black chickpea curry'],
+    ['chole','छोले','chole','Chickpea curry'],
+    ['rajma','राजमा','rajma','Kidney bean curry'],
+    ['sambar','सांबार','sambar','Sambar'],
+    ['pithla','पिठलं','pithla','Besan curry'],
+    ['methi-pitla','मेथी पिठलं','methi pitla','Fenugreek besan curry'],
+    ['kokum-kadhi','कोकम कढी','kokum kadhi','Kokum kadhi'],
+    ['sprouts-salad','मोड आलेले कडधान्य','mod alele kadadhanya','Sprout salad'],
+  ]},
+
+  { id:'bhaji', mr:'भाज्या', en:'Vegetables', dishes:[
+    ['batata-bhaji','बटाट्याची भाजी','batatyachi bhaji','Potato sabzi'],
+    ['kobi-bhaji','कोबीची भाजी','kobichi bhaji','Cabbage sabzi'],
+    ['flower-batata','फ्लॉवर-बटाटा भाजी','flower-batata bhaji','Cauliflower & potato'],
+    ['bhendi-bhaji','भेंडीची भाजी','bhendichi bhaji','Okra sabzi'],
+    ['bharli-bhendi','भरली भेंडी','bharli bhendi','Stuffed okra'],
+    ['bharli-vangi','भरली वांगी','bharli vangi','Stuffed baby aubergine'],
+    ['vangyache-bharit','वांग्याचे भरीत','vangyache bharit','Smoked aubergine mash'],
+    ['tondli-bhaji','तोंडलीची भाजी','tondlichi bhaji','Ivy gourd sabzi'],
+    ['dudhi-bhaji','दुधी भोपळ्याची भाजी','dudhi bhoplyachi bhaji','Bottle gourd sabzi'],
+    ['dodka-bhaji','दोडक्याची भाजी','dodkyachi bhaji','Ridge gourd sabzi'],
+    ['padwal-bhaji','पडवळाची भाजी','padvalachi bhaji','Snake gourd sabzi'],
+    ['karle-bhaji','कारल्याची भाजी','karlyachi bhaji','Bitter gourd sabzi'],
+    ['gavar-bhaji','गवारीची भाजी','gavarichi bhaji','Cluster bean sabzi'],
+    ['bhopla-bhaji','भोपळ्याची भाजी','bhoplyachi bhaji','Pumpkin sabzi'],
+    ['gajar-bhaji','गाजराची भाजी','gajarachi bhaji','Carrot sabzi'],
+    ['matar-bhaji','मटारची भाजी','matarchi bhaji','Green pea sabzi'],
+    ['beet-bhaji','बीटाची भाजी','beetachi bhaji','Beetroot sabzi'],
+    ['ratale-bhaji','रताळ्याची भाजी','ratalyachi bhaji','Sweet potato sabzi'],
+    ['palak-bhaji','पालकाची भाजी','palakachi bhaji','Spinach sabzi'],
+    ['shepu-bhaji','शेपूची भाजी','shepuchi bhaji','Dill sabzi'],
+    ['math-bhaji','माठाची भाजी','mathachi bhaji','Amaranth leaf sabzi'],
+    ['ambadi-bhaji','अंबाडीची भाजी','ambadichi bhaji','Sorrel leaf sabzi'],
+    ['mix-veg','मिक्स भाजी','mix bhaji','Mixed vegetables'],
+    ['aloo-gobi','आलू गोबी','aloo gobi','Potato & cauliflower'],
+    ['jeera-aloo','जिरा आलू','jeera aloo','Cumin potatoes'],
+    ['kanda-bhaji','कांद्याची भाजी','kandyachi bhaji','Onion sabzi'],
+    ['capsicum-besan','ढोबळी मिरची-बेसन','dhobli mirchi-besan','Capsicum besan sabzi'],
+    ['steamed-veg','वाफवलेल्या भाज्या','vaphavlelya bhajya','Steamed vegetables'],
+  ]},
+
+  { id:'bhaat', mr:'भात', en:'Rice', dishes:[
+    ['khichdi','खिचडी','khichdi','Khichdi'],
+    ['palak-khichdi','पालक खिचडी','palak khichdi','Spinach khichdi'],
+    ['masale-bhat','मसाले भात','masale bhat','Spiced Maharashtrian rice'],
+    ['veg-pulao','भाजी पुलाव','bhaji pulav','Vegetable pulao'],
+    ['jeera-rice','जिरा भात','jira bhaat','Cumin rice'],
+    ['fodnicha-bhaat','फोडणीचा भात','fodnicha bhaat','Tempered leftover rice'],
+    ['veg-biryani','व्हेज बिर्याणी','veg biryani','Vegetable biryani'],
+    ['tomato-bhaat','टोमॅटो भात','tomato bhaat','Tomato rice'],
+    ['lemon-rice','लिंबू भात','limbu bhaat','Lemon rice'],
+  ]},
+
+  { id:'poli', mr:'पोळी आणि भाकरी', en:'Breads', dishes:[
+    ['poli','पोळी / चपाती','poli / chapati','Chapati'],
+    ['phulka','फुलका','phulka','Puffed roti'],
+    ['bajra-bhakri','बाजरीची भाकरी','bajrichi bhakri','Pearl millet flatbread'],
+    ['tandul-bhakri','तांदळाची भाकरी','tandalachi bhakri','Rice flatbread'],
+    ['stuffed-paratha','भरलेला पराठा','bharlela paratha','Stuffed paratha'],
+    ['masala-poli','मसाला पोळी','masala poli','Spiced flatbread'],
+  ]},
+
+  { id:'chutney', mr:'चटणी आणि कोशिंबीर', en:'Chutneys & salads', dishes:[
+    ['naral-chutney','नारळाची चटणी','naralachi chatni','Coconut chutney'],
+    ['kothimbir-chutney','कोथिंबिरीची चटणी','kothimbirichi chatni','Coriander chutney'],
+    ['pudina-chutney','पुदिन्याची चटणी','pudinyachi chatni','Mint chutney'],
+    ['shengdana-chutney','शेंगदाण्याची चटणी','shengdanyachi chatni','Dry peanut chutney'],
+    ['tomato-chutney','टोमॅटोची चटणी','tomatochi chatni','Tomato chutney'],
+    ['jawas-chutney','जवसाची चटणी','javasachi chatni','Flaxseed chutney'],
+    ['khamang-kakdi','खमंग काकडी','khamang kakdi','Cucumber salad'],
+    ['tomato-koshimbir','टोमॅटो-कांदा कोशिंबीर','tomato-kanda koshimbir','Tomato & onion salad'],
+    ['papad','पापड','papad','Papad'],
+  ]},
+
+  { id:'soup', mr:'सूप आणि हलके पदार्थ', en:'Soups & light dishes', dishes:[
+    ['tomato-soup','टोमॅटोचे सूप','tomatoche soup','Tomato soup'],
+    ['veg-soup','भाज्यांचे सूप','bhajyanche soup','Vegetable soup'],
+    ['palak-dal-soup','पालक-डाळीचे सूप','palak-dalyache soup','Spinach & dal soup'],
+    ['jeera-chaha','जिऱ्याचा चहा','jiryacha chaha','Cumin tea'],
+  ]},
+
+];
+
+const OPTS = [
+  { v:2, mr:'आवडतं',    en:'Love it' },
+  { v:1, mr:'ठीक आहे', en:'Fine' },
+  { v:0, mr:'नको',      en:'Rather not' },
+];
+
+const ALL = SECTIONS.flatMap(s => s.dishes.map(d => d[0]));
+const KEY = 'sonali-repertoire-v1';
+let answers = {}, notes = '';
+
+try {
+  const s = JSON.parse(localStorage.getItem(KEY));
+  if (s) { answers = s.answers || {}; notes = s.notes || ''; }
+} catch (e) {}
+
+function persist(){
+  try { localStorage.setItem(KEY, JSON.stringify({ answers, notes })); } catch(e){}
+}
+
+/* ---------- render ---------- */
+const list = document.getElementById('list');
+list.innerHTML = SECTIONS.map(s => `
+  <section id="s-${s.id}">
+    <div class="sec-head">
+      <h2>${s.mr}</h2>
+      <span class="en">${s.en}</span>
+      <span class="n">${s.dishes.length}</span>
+    </div>
+    ${s.dishes.map(([id, mr, tr, en]) => `
+      <div class="dish" id="d-${id}" ${id in answers ? `data-v="${answers[id]}"` : ''}>
+        <div>
+          <div class="name">${mr}</div>
+          <div class="sub"><i>${tr}</i> · ${en}</div>
+        </div>
+        <div class="opts" role="group" aria-label="${en}">
+          ${OPTS.map(o => `
+            <button class="opt" type="button" data-id="${id}" data-v="${o.v}"
+                    aria-pressed="${answers[id] === o.v}">
+              ${o.mr}<span class="en">${o.en}</span>
+            </button>`).join('')}
+        </div>
+      </div>`).join('')}
+  </section>`).join('');
+
+document.getElementById('chips').innerHTML =
+  SECTIONS.map(s => `<button class="chip" type="button" data-go="s-${s.id}">${s.mr}</button>`).join('');
+document.querySelectorAll('[data-go]').forEach(c => c.onclick = () =>
+  document.getElementById(c.dataset.go).scrollIntoView({ block:'start' }));
+
+document.getElementById('notes').value = notes;
+document.getElementById('notes').addEventListener('input', e => { notes = e.target.value; persist(); });
+
+list.addEventListener('click', e => {
+  const b = e.target.closest('.opt');
+  if (!b) return;
+  const { id } = b.dataset, v = +b.dataset.v;
+  answers[id] = v;
+  const row = document.getElementById('d-' + id);
+  row.dataset.v = v;
+  row.querySelectorAll('.opt').forEach(o => o.setAttribute('aria-pressed', +o.dataset.v === v));
+  persist(); progress();
+});
+
+function progress(){
+  const done = ALL.filter(id => id in answers).length;
+  document.getElementById('count').textContent =
+    done.toLocaleString('mr-IN') + ' / ' + ALL.length.toLocaleString('mr-IN');
+  document.getElementById('fill').style.width = (done / ALL.length * 100) + '%';
+  document.getElementById('msg').textContent = done === ALL.length
+    ? 'सगळं झालं! धन्यवाद दीदी 🙏'
+    : 'तुमची उत्तरं आपोआप सेव्ह होतात.';
+}
+progress();
+
+/* ---------- results ---------- */
+const dlg = document.getElementById('dlg');
+const NAME = Object.fromEntries(SECTIONS.flatMap(s => s.dishes.map(d => [d[0], d[3]])));
+
+document.getElementById('doneBtn').onclick = () => {
+  const by = v => ALL.filter(id => answers[id] === v);
+  const un = ALL.filter(id => !(id in answers));
+  document.getElementById('n2').textContent = by(2).length;
+  document.getElementById('n1').textContent = by(1).length;
+  document.getElementById('n0').textContent = by(0).length;
+  document.getElementById('nu').textContent = un.length;
+
+  const line = (label, ids) => label + ': ' + (ids.length ? ids.join(', ') : '—');
+  document.getElementById('out').textContent = [
+    'SONALI PREFERENCES v1',
+    '',
+    line('LOVES', by(2)),
+    '',
+    line('FINE', by(1)),
+    '',
+    line('RATHER NOT', by(0)),
+    '',
+    line('UNANSWERED', un),
+    '',
+    'NOTES: ' + (notes.trim() || '—'),
+  ].join('\n');
+  dlg.showModal();
+};
+document.getElementById('closeBtn').onclick = () => dlg.close();
+document.getElementById('copyBtn').onclick = () => {
+  const t = document.getElementById('out').textContent;
+  const btn = document.getElementById('copyBtn');
+  const ok = () => { btn.textContent = 'Copied'; setTimeout(()=>btn.textContent='Copy', 1600); };
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, fallback);
+  else fallback();
+  function fallback(){
+    const r = document.createRange();
+    r.selectNodeContents(document.getElementById('out'));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    btn.textContent = 'Press ⌘C'; setTimeout(()=>btn.textContent='Copy', 2400);
+  }
+};
+document.getElementById('resetBtn').onclick = () => {
+  if (!confirm('Clear all answers?')) return;
+  answers = {}; notes = '';
+  persist();
+  document.querySelectorAll('.dish').forEach(d => delete d.dataset.v);
+  document.querySelectorAll('.opt').forEach(o => o.setAttribute('aria-pressed','false'));
+  document.getElementById('notes').value = '';
+  progress();
+};
+</script>

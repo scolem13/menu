@@ -167,6 +167,7 @@
 <script>
 /* ---------------- state ---------------- */
 const BY_ID = Object.fromEntries(INGREDIENTS.map(i => [i.id, i]));
+const PANTRY = INGREDIENTS.filter(i => !i.shop);   // shop-only items never hit the pantry tab
 const LS = 'menu-state-v1';
 let state = load();
 
@@ -200,7 +201,8 @@ document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
 function renderPantry(){
   const el = document.getElementById('pantryCard');
   el.innerHTML = CATEGORIES.map(c => {
-    const items = INGREDIENTS.filter(i => i.cat === c.id);
+    const items = INGREDIENTS.filter(i => i.cat === c.id && !i.shop);
+    if (!items.length) return '';
     return `<h3>${c.en} · ${c.mr}</h3><div class="grid">` + items.map(i =>
       `<label class="chk${has(i.id)?' on':''}" data-id="${i.id}">
          <input type="checkbox" ${has(i.id)?'checked':''}>
@@ -221,7 +223,7 @@ function renderPantry(){
   updateCounts();
 }
 function updateCounts(){
-  document.getElementById('counts').textContent = state.have.length + ' of ' + INGREDIENTS.length + ' ticked';
+  document.getElementById('counts').textContent = state.have.length + ' of ' + PANTRY.length + ' ticked';
 }
 document.getElementById('mixer').onchange = e => {
   state.mixer = e.target.checked;
@@ -242,7 +244,7 @@ document.getElementById('pasteBtn').onclick = () => {
   const text = normalize(document.getElementById('pasteBox').value);
   if (!text){ document.getElementById('pasteResult').textContent=''; return; }
   const hits = [];
-  INGREDIENTS.forEach(i => {
+  PANTRY.forEach(i => {
     const keys = [i.en, i.mr, i.hi, i.tr].map(normalize)
       .flatMap(k => [k, k.replace(/s$/,''), k.split(' ')[0]])
       .filter(k => k.length > 2);
